@@ -5,33 +5,27 @@ from langchain import PromptTemplate
 import streamlit as st
 import os
 
+# Set up the environment variable for the Google API key
 os.environ['GOOGLE_API_KEY'] = st.secrets['GOOGLE_API_KEY']
 
-# Create prompt template for generating tweets
+# Create a prompt template for generating stock recommendations
+stock_template = "Give me the top {number} stocks to look for today with a brief reason for each recommendation."
 
-tweet_template = "Give me {number} tweets on {topic}"
-
-tweet_prompt = PromptTemplate(template = tweet_template, input_variables = ['number', 'topic'])
+stock_prompt = PromptTemplate(template=stock_template, input_variables=['number'])
 
 # Initialize Google's Gemini model
-gemini_model = ChatGoogleGenerativeAI(model = "gemini-1.5-flash-latest")
-
+gemini_model = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest")
 
 # Create LLM chain using the prompt template and model
-tweet_chain = tweet_prompt | gemini_model
+stock_chain = stock_prompt | gemini_model
 
+# Streamlit UI for the application
+st.header("Stock Recommendation Generator")
 
-import streamlit as st
+st.subheader("Get the top stocks to watch for today using Generative AI")
 
-st.header("Tweet Generator- Raj")
-
-st.subheader("Generate tweets using Generative AI")
-
-topic = st.text_input("Topic")
-
-number = st.number_input("Number of tweets", min_value = 1, max_value = 10, value = 1, step = 1)
+number = st.number_input("Number of stocks", min_value=1, max_value=10, value=5, step=1)
 
 if st.button("Generate"):
-    tweets = tweet_chain.invoke({"number" : number, "topic" : topic})
-    st.write(tweets.content)
-    
+    stocks = stock_chain.invoke({"number": number})
+    st.write(stocks.content)

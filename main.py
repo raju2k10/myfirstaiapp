@@ -1,31 +1,32 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain import LLMChain
 from langchain import PromptTemplate
-
 import streamlit as st
 import os
 
-# Set up the environment variable for the Google API key
+# Set up API key for Google's Generative AI
 os.environ['GOOGLE_API_KEY'] = st.secrets['GOOGLE_API_KEY']
 
-# Create a prompt template for generating stock recommendations
-stock_template = "Give me the top {number} stocks to look for today with a brief reason for each recommendation."
+# Create a prompt template for generating recommendations
+recommendation_template = "Give me the top 5 recommendations to visit in {country}"
 
-stock_prompt = PromptTemplate(template=stock_template, input_variables=['number'])
+recommendation_prompt = PromptTemplate(template=recommendation_template, input_variables=['country'])
 
 # Initialize Google's Gemini model
 gemini_model = ChatGoogleGenerativeAI(model="gemini-1.5-flash-latest")
 
-# Create LLM chain using the prompt template and model
-stock_chain = stock_prompt | gemini_model
+# Create the LLM chain for generating recommendations
+recommendation_chain = recommendation_prompt | gemini_model
 
-# Streamlit UI for the application
-st.header("Stock Recommendation Generator")
+# Streamlit app setup
+st.header("Top 5 Travel Tourist Recommendations")
 
-st.subheader("Get the top stocks to watch for today using Generative AI")
+st.subheader("Discover the must-visit places in any country")
 
-number = st.number_input("Number of stocks", min_value=1, max_value=10, value=5, step=1)
+country = st.text_input("Enter a country:")
 
-if st.button("Generate"):
-    stocks = stock_chain.invoke({"number": number})
-    st.write(stocks.content)
+if st.button("Generate Recommendations"):
+    if country.strip():
+        recommendations = recommendation_chain.invoke({"country": country})
+        st.write(recommendations.content)
+    else:
+        st.warning("Please enter a valid country name.")

@@ -20,13 +20,20 @@ recommendation_chain = recommendation_prompt | gemini_model
 # Streamlit app setup
 st.header("Top 5 Travel Tourist Recommendations")
 
-st.subheader("Discover the must-visit places in any country")
+st.subheader("Discover the must-visit places in multiple countries")
 
-country = st.text_input("Enter a country:")
+# Allow the user to select multiple countries
+countries = st.multiselect(
+    "Select countries to generate recommendations:",
+    options=["Canada", "Cuba", "France", "Italy", "Japan", "Australia", "USA"],
+    default=["Canada", "Cuba"]  # Pre-select Canada and Cuba
+)
 
 if st.button("Generate Recommendations"):
-    if country.strip():
-        recommendations = recommendation_chain.invoke({"country": country})
-        st.write(recommendations.content)
+    if countries:
+        for country in countries:
+            st.subheader(f"Top 5 recommendations for {country}:")
+            recommendations = recommendation_chain.invoke({"country": country})
+            st.write(recommendations.content)
     else:
-        st.warning("Please enter a valid country name.")
+        st.warning("Please select at least one country.")
